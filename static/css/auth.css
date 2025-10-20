@@ -1,0 +1,453 @@
+/**
+ * Authentication Pages Styles
+ * Shared styles for login and register pages
+ */
+
+/* ============================================================================
+   CSS CUSTOM PROPERTIES (VARIABLES)
+   ============================================================================ */
+
+:root {
+  /* Colors */
+  --primary-color: #0d6efd;
+  --success-color: #28a745;
+  --warning-color: #ffc107;
+  --danger-color: #dc3545;
+  --info-color: #17a2b8;
+  --dark-color: #212529;
+  
+  /* Glassmorphism */
+  --glass-transparent: rgba(255, 255, 255, 0.3);
+  --glass-hover: rgba(255, 255, 255, 0.6);
+  --glass-selected: rgba(255, 255, 255, 0.18);
+  
+  /* Text Colors */
+  --text-transparent: #fff;
+  --text-selected: #232046;
+  --text-muted: #6c757d;
+  
+  /* Design System */
+  --border-radius: 12px;
+  --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --shadow-primary: 0 8px 32px rgba(102, 126, 234, 0.15);
+  --shadow-hover: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* ============================================================================
+   GLOBAL AUTH PAGE STYLES
+   ============================================================================ */
+
+.auth-page {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+/* ============================================================================
+   AUTH CONTAINER
+   ============================================================================ */
+
+.auth-container {
+  background: rgba(255, 255, 255, 0.18);
+  backdrop-filter: blur(8px) saturate(180%);
+  -webkit-backdrop-filter: blur(8px) saturate(180%);
+  border-radius: var(--border-radius);
+  box-shadow: var(--shadow-primary);
+  padding: 3rem;
+  width: 100%;
+  max-width: 450px;
+  position: relative;
+  overflow: hidden;
+  margin: 1rem;
+  transition: var(--transition);
+}
+
+.auth-container::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--glass-transparent);
+}
+
+/* ============================================================================
+   BRAND SECTION
+   ============================================================================ */
+
+.brand-section {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.brand-icon {
+  font-size: 3rem;
+  color: var(--text-selected);
+  margin-bottom: 1rem;
+  display: inline-block;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    transform: scale(1); 
+  }
+  50% { 
+    transform: scale(1.05); 
+  }
+}
+
+.brand-title {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--text-selected);
+  margin-bottom: 0.5rem;
+}
+
+.brand-subtitle {
+  color: var(--text-selected);
+  font-size: 0.95rem;
+  opacity: 0.9;
+}
+
+/* ============================================================================
+   FORM STYLES
+   ============================================================================ */
+
+.form-floating {
+  margin-bottom: 1rem;
+}
+
+.form-control {
+  border-radius: var(--border-radius);
+  border: 2px solid #e9ecef;
+  padding: 1rem 0.75rem;
+  height: auto;
+  transition: var(--transition);
+  font-size: 1rem;
+  background-color: rgba(255, 255, 255, 0.95);
+}
+
+.form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: var(--shadow-primary);
+  transform: translateY(-2px);
+  background-color: #fff;
+}
+
+.form-control.is-valid {
+  border-color: var(--success-color);
+  background-color: rgba(255, 255, 255, 0.98);
+}
+
+.form-control.is-invalid {
+  border-color: var(--danger-color);
+  background-color: rgba(255, 255, 255, 0.98);
+}
+
+.form-control:disabled {
+  background-color: rgba(255, 255, 255, 0.6);
+  cursor: not-allowed;
+}
+
+.form-floating > label {
+  padding: 1rem 0.75rem;
+  color: var(--text-muted);
+}
+
+.form-floating > .form-control:focus ~ label,
+.form-floating > .form-control:not(:placeholder-shown) ~ label {
+  color: var(--primary-color);
+  transform: scale(0.85) translateY(-0.5rem) translateX(0.15rem);
+}
+
+.invalid-feedback,
+.valid-feedback {
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+/* ============================================================================
+   BUTTONS
+   ============================================================================ */
+
+.btn {
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  padding: 0.875rem 2rem;
+  transition: var(--transition);
+  border: none;
+  font-size: 1rem;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn-primary {
+  background: var(--glass-transparent);
+  color: var(--text-transparent);
+  width: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-primary::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+  transition: var(--transition);
+}
+
+.btn-primary:hover {
+  background: var(--glass-hover) !important;
+  color: var(--text-selected) !important;
+  border-color: transparent !important;
+}
+
+.btn-primary:hover::before {
+  left: 100%;
+  transition: left 0.6s ease;
+}
+
+.btn-primary:focus,
+.btn-primary:active {
+  background: var(--glass-hover) !important;
+  color: var(--text-selected) !important;
+  border-color: transparent !important;
+  box-shadow: var(--shadow-hover) !important;
+}
+
+.btn-primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.btn-loading {
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.btn-success {
+  background: var(--glass-transparent);
+  color: var(--text-transparent);
+  width: 100%;
+}
+
+.btn-success:hover {
+  background: var(--glass-hover) !important;
+  color: var(--text-selected) !important;
+  border-color: transparent !important;
+}
+
+.btn-success:focus,
+.btn-success:active {
+  background: var(--glass-hover) !important;
+  color: var(--text-selected) !important;
+  border-color: transparent !important;
+}
+
+/* ============================================================================
+   FLASH MESSAGES
+   ============================================================================ */
+
+.flash {
+  border-radius: var(--border-radius);
+  padding: 1rem;
+  margin-bottom: 1.5rem;
+  border: none;
+  font-weight: 500;
+  animation: slideInDown 0.3s ease-out;
+}
+
+@keyframes slideInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.flash.success,
+.flash.info {
+  background: var(--glass-transparent);
+  color: var(--success-color);
+  border-left: 4px solid var(--success-color);
+}
+
+.flash.danger,
+.flash.error {
+  background: var(--glass-transparent);
+  color: var(--danger-color);
+  border-left: 4px solid var(--danger-color);
+}
+
+.flash.warning {
+  background: var(--glass-transparent);
+  color: #856404;
+  border-left: 4px solid var(--warning-color);
+}
+
+/* ============================================================================
+   DIVIDER
+   ============================================================================ */
+
+.divider {
+  text-align: center;
+  margin: 2rem 0;
+  position: relative;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: #e9ecef;
+  z-index: 1;
+}
+
+.divider span {
+  background: rgba(255, 255, 255, 0.95);
+  padding: 0 1rem;
+  position: relative;
+  z-index: 2;
+}
+
+/* ============================================================================
+   REGISTER/LOGIN LINKS
+   ============================================================================ */
+
+.register-link,
+.login-link {
+  text-align: center;
+  margin-top: 1.5rem;
+}
+
+.register-link p,
+.login-link p {
+  color: var(--text-transparent) !important;
+  margin-bottom: 0;
+}
+
+.register-link a,
+.login-link a {
+  color: var(--text-transparent);
+  text-decoration: none;
+  font-weight: 500;
+  transition: var(--transition);
+}
+
+.register-link a:hover,
+.login-link a:hover {
+  color: var(--text-selected);
+  text-decoration: underline;
+}
+
+/* ============================================================================
+   SPINNER (for loading states)
+   ============================================================================ */
+
+.spinner-border-sm {
+  width: 1rem;
+  height: 1rem;
+  border-width: 0.15em;
+}
+
+/* ============================================================================
+   ACCESSIBILITY
+   ============================================================================ */
+
+.auth-container:focus-within {
+  outline: 2px solid var(--glass-transparent);
+  outline-offset: 4px;
+}
+
+.form-control:focus-visible {
+  outline: 2px solid var(--text-transparent);
+  outline-offset: 2px;
+}
+
+/* ============================================================================
+   RESPONSIVE DESIGN
+   ============================================================================ */
+
+@media (max-width: 576px) {
+  .auth-container {
+    margin: 0.5rem;
+    padding: 2rem 1.5rem;
+  }
+  
+  .brand-icon {
+    font-size: 2.5rem;
+  }
+  
+  .brand-title {
+    font-size: 1.5rem;
+  }
+  
+  .brand-subtitle {
+    font-size: 0.875rem;
+  }
+  
+  .btn {
+    padding: 0.75rem 1.5rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .auth-container {
+    padding: 1.5rem 1rem;
+  }
+  
+  .brand-icon {
+    font-size: 2rem;
+  }
+}
+
+/* ============================================================================
+   DARK MODE SUPPORT (Future Enhancement)
+   ============================================================================ */
+
+@media (prefers-color-scheme: dark) {
+  /* Keep the gradient background consistent */
+  .auth-page {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  }
+}
+
+/* ============================================================================
+   PRINT STYLES
+   ============================================================================ */
+
+@media print {
+  .auth-page {
+    background: white;
+  }
+  
+  .auth-container {
+    box-shadow: none;
+    border: 1px solid #ddd;
+  }
+}

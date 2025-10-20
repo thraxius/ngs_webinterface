@@ -1,0 +1,289 @@
+/**
+ * Register Page Additional Styles
+ * Extends auth.css with register-specific styles
+ */
+
+/* ============================================================================
+   REGISTER-SPECIFIC CONTAINER
+   ============================================================================ */
+
+.auth-container-large {
+  max-width: 500px;
+}
+
+/* ============================================================================
+   FIELD VALIDATION MESSAGES
+   ============================================================================ */
+
+.field-validation {
+  font-size: 0.75rem;
+  margin-top: 0.5rem;
+}
+
+.validation-message {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.25rem;
+  padding: 0.25rem 0;
+  transition: var(--transition);
+}
+
+.validation-message i {
+  width: 16px;
+  margin-right: 0.5rem;
+  font-size: 0.875rem;
+}
+
+.validation-message.valid {
+  color: var(--success-color);
+}
+
+.validation-message.invalid {
+  color: var(--danger-color);
+}
+
+.validation-message span {
+  flex: 1;
+}
+
+/* ============================================================================
+   PASSWORD STRENGTH INDICATOR
+   ============================================================================ */
+
+.password-strength {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  animation: slideDown 0.3s ease-out;
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Strength Bar */
+.strength-bar {
+  height: 6px;
+  background: #e9ecef;
+  border-radius: 3px;
+  margin: 0.5rem 0;
+  overflow: hidden;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.strength-fill {
+  height: 100%;
+  transition: all 0.3s ease;
+  border-radius: 3px;
+}
+
+/* Strength Levels */
+.strength-none {
+  background: #e9ecef;
+  width: 0%;
+}
+
+.strength-weak {
+  background: linear-gradient(90deg, var(--danger-color), #ff6b6b);
+  width: 25%;
+}
+
+.strength-fair {
+  background: linear-gradient(90deg, var(--warning-color), #ffd93d);
+  width: 50%;
+}
+
+.strength-good {
+  background: linear-gradient(90deg, var(--primary-color), #4dabf7);
+  width: 75%;
+}
+
+.strength-strong {
+  background: linear-gradient(90deg, var(--success-color), #51cf66);
+  width: 100%;
+}
+
+/* Strength Text */
+.strength-text {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+  color: var(--text-muted);
+}
+
+/* ============================================================================
+   PASSWORD REQUIREMENTS
+   ============================================================================ */
+
+.password-requirements {
+  font-size: 0.75rem;
+  margin-top: 0.75rem;
+  padding: 0.75rem;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.requirement {
+  display: flex;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  transition: var(--transition);
+  padding: 0.25rem 0;
+}
+
+.requirement:last-child {
+  margin-bottom: 0;
+}
+
+.requirement i {
+  width: 16px;
+  margin-right: 0.5rem;
+  font-size: 0.75rem;
+  transition: var(--transition);
+}
+
+.requirement span {
+  flex: 1;
+  transition: var(--transition);
+}
+
+.requirement.met {
+  color: var(--success-color);
+}
+
+.requirement.met i {
+  animation: checkBounce 0.3s ease-out;
+}
+
+@keyframes checkBounce {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.2);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.requirement.unmet {
+  color: var(--text-muted);
+}
+
+/* ============================================================================
+   FORM SPACING ADJUSTMENTS
+   ============================================================================ */
+
+.form-floating.mb-3 {
+  margin-bottom: 1.25rem !important;
+}
+
+/* When validation messages are shown, add more space */
+.form-floating:has(.field-validation:not(:empty)) {
+  margin-bottom: 1.5rem !important;
+}
+
+/* ============================================================================
+   ENHANCED BUTTON STATES
+   ============================================================================ */
+
+.btn-success.btn-loading {
+  background: var(--glass-transparent) !important;
+  color: var(--text-transparent) !important;
+}
+
+/* ============================================================================
+   RESPONSIVE ADJUSTMENTS
+   ============================================================================ */
+
+@media (max-width: 576px) {
+  .auth-container-large {
+    max-width: 100%;
+  }
+  
+  .password-requirements {
+    font-size: 0.7rem;
+    padding: 0.5rem;
+  }
+  
+  .requirement {
+    margin-bottom: 0.375rem;
+  }
+  
+  .strength-text {
+    font-size: 0.75rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .validation-message {
+    font-size: 0.7rem;
+  }
+  
+  .field-validation {
+    font-size: 0.7rem;
+  }
+}
+
+/* ============================================================================
+   ACCESSIBILITY ENHANCEMENTS
+   ============================================================================ */
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .strength-bar {
+    border: 2px solid currentColor;
+  }
+  
+  .password-requirements {
+    border: 2px solid currentColor;
+  }
+  
+  .requirement.met {
+    font-weight: 700;
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .password-strength,
+  .strength-fill,
+  .requirement,
+  .validation-message {
+    animation: none;
+    transition: none;
+  }
+  
+  .requirement.met i {
+    animation: none;
+  }
+}
+
+/* ============================================================================
+   FOCUS STATES
+   ============================================================================ */
+
+.password-requirements:focus-within {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: var(--primary-color);
+}
+
+/* ============================================================================
+   PRINT STYLES
+   ============================================================================ */
+
+@media print {
+  .password-strength,
+  .password-requirements,
+  .field-validation {
+    display: none;
+  }
+}

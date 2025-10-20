@@ -1,0 +1,462 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NGS Analyse Interface</title>
+  
+  <!-- CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet">
+  <link href="{{ url_for('static', filename='icon/dna.png') }}" rel="icon" type="image/png">
+</head>
+
+<body>
+<div class="container my-4">
+  <div class="main-container">
+    
+    <!-- Header -->
+    <div class="header-section">
+      <div class="d-flex justify-content-between align-items-center flex-wrap">
+        <div>
+          <h1 class="mb-2">
+            <i class="fas fa-dna me-3"></i>
+            NGS Analyse Interface
+          </h1>
+          <p class="mb-0 opacity-75">Next Generation Sequencing - Bioinformatik Pipeline</p>
+        </div>
+        <div class="user-info">
+          <div class="user-badge">
+            <i class="fas fa-user me-2"></i>
+            <span id="currentUsername">{{ current_user.username }}</span>
+            {% if current_user.role %}
+              <span class="badge bg-light text-dark ms-2">{{ current_user.role.name }}</span>
+            {% endif %}
+          </div>
+          <a href="{{ url_for('auth.logout') }}" class="btn btn-outline-light btn-sm">
+            <i class="fas fa-sign-out-alt me-1"></i>Logout
+          </a>
+        </div>
+      </div>
+      
+      <!-- Emergency Reset Button -->
+      {% if running_job %}
+      <div class="mt-3">
+        <form method="POST" action="{{ url_for('analysis.force_reset') }}" style="display: inline;">
+          <button type="submit" class="btn btn-sm btn-outline-light" data-confirm="Alle hängenden Analysen zurücksetzen? Diese Aktion kann nicht rückgängig gemacht werden.">
+            <i class="fas fa-power-off me-1"></i>Force Reset
+          </button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+
+    <div class="header-section">
+      {% if running_job %}
+      <!-- Running Analysis Banner -->
+      <div id="analysisBanner" class="alert d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-4" role="alert" 
+         style="background: var(--glass-hover); border: 1px solid var(--glass-selected); backdrop-filter: blur(8px);">
+        <div class="mb-2 mb-md-0">
+          <strong><i class="fas fa-cogs me-2"></i>Analyse läuft:</strong>
+          <code style="background: var(--glass-selected);">{{ running_job.job_code }}</code>
+          <small class="text-muted">
+            ({{ running_job.local_created | localize }} - {{ running_job.job_type }})
+          </small>
+        </div>
+        <form method="POST" action="{{ url_for('analysis.cancel_analysis', job_id=running_job.id) }}">
+          <button type="submit" class="btn btn-cancel" data-confirm="Analyse wirklich abbrechen?">
+            <i class="fas fa-stop me-1"></i>Abbrechen
+          </button>
+        </form>
+      </div>
+
+      <!-- Progress Bar -->
+      <div class="progress mb-4" style="height: 15px;">
+        <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%;">
+          <span class="visually-hidden">Analyse läuft...</span>
+        </div>
+      </div>
+
+      <!-- Live Log -->
+      <div class="card mb-4" style="background: var(--glass-hover); border: 1px solid var(--glass-selected); backdrop-filter: blur(8px);">
+        <div class="card-header d-flex justify-content-between align-items-center" 
+           style="background: var(--glass-selected); border-bottom: 1px solid var(--glass-selected);">
+          <h5 class="mb-0">
+            <i class="fas fa-terminal me-2"></i>Live-Log
+          </h5>
+          <div class="loading-spinner"></div>
+        </div>
+        <div class="card-body p-0">
+          <pre id="logOutput" class="log-container mb-0" style="background: var(--text-selected);"></pre>
+        </div>
+      </div>
+
+      {% else %}
+
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-tabs" id="mainTabs" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="analysis-tab" data-bs-toggle="tab" data-bs-target="#analysis" type="button" role="tab">
+              <i class="fas fa-rocket me-2"></i>Neue Analyse
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="history-tab" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">
+              <i class="fas fa-history me-2"></i>Analyse-Historie
+            </button>
+          </li>
+          {% if current_user.role and current_user.role.name == 'admin' %}
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="users-tab" data-bs-toggle="tab" data-bs-target="#users" type="button" role="tab">
+              <i class="fas fa-users me-2"></i>Benutzerverwaltung
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="logs-tab" data-bs-toggle="tab" data-bs-target="#logs" type="button" role="tab">
+              <i class="fas fa-code me-2"></i>Logs
+            </button>
+          </li>
+          {% endif %}
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="mainTabsContent">
+          
+          <!-- Analysis Tab -->
+          <div class="tab-pane fade show active p-4" id="analysis" role="tabpanel">
+            
+            <!-- Analysis Form -->
+            <form id="analysisForm" method="post" action="{{ url_for('analysis.start_analysis') }}">
+              <input type="hidden" id="selectedRunFolderInput" name="folder_path">
+              <input type="hidden" id="analysisTypeInput" name="analysis_type">
+              
+              <!-- Analysis Type Selection -->
+              <div class="mb-4">
+                <h5 class="mb-3">
+                  <i class="fas fa-cog me-1"></i>Analyse-Typ auswählen
+                </h5>
+                <div class="row">
+                  <div class="col-md-6">
+                    <div class="analysis-type-card" data-type="wgs">
+                      <span class="fas fa-bacteria fa-3x mb-3"></span>
+                      <h5>Bakterien-WGS</h5>
+                      <p>Charakterisierung und Typisierung von bakteriellen Isolaten</p>
+                    </div>
+                  </div>
+                  <div class="col-md-6">
+                    <div class="analysis-type-card" data-type="species">
+                      <span class="fas fa-paw fa-3x mb-3"></span>
+                      <h5>Tierartendifferenzierung</h5>
+                      <p>Identifikation und Differenzierung von Tierarten in Lebensmitteln</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Run Selection -->
+              <div id="runFolderSection" class="run-folder-section mb-4">
+                <div class="row">
+                  <div class="col-md-8">
+                    <button type="button" class="btn btn-primary btn-lg" id="openRunFolderBtn">
+                      <i class="fas fa-folder-open me-2"></i>Run-Ordner auswählen
+                    </button>
+                    <div id="selectedRunFolder" class="mt-2 fw-bold text-success" style="display: none;">
+                      <i class="fas fa-magnifying-glass-chart me-1"></i>
+                      <span></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Sample Table -->
+              <div id="sampleSection" style="display: none;">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h5 class="mb-0">
+                    <i class="fas fa-vials me-2"></i>Gefundene Proben
+                  </h5>
+                </div>
+                
+                <div class="table-responsive">
+                  <table id="sampleTable" class="table table-hover">
+                    <thead class="table-dark">
+                      <tr>
+                        <th style="width: 60px;">#</th>
+                        <th>Herkunft</th>
+                        <th>Probennummer</th>
+                      </tr>
+                    </thead>
+                    <tbody></tbody>
+                  </table>
+                </div>
+                
+                <div class="text-center mt-4">
+                  <button type="submit" class="btn btn-success btn-lg">
+                    <i class="fas fa-rocket me-2"></i>Analyse starten
+                  </button>
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- History Tab -->
+          <div class="tab-pane fade p-4" id="history" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <h5 class="mb-0">
+                <i class="fas fa-clock-rotate-left me-2"></i>Historie über die letzten runs:
+                <div id="historyCounter" class="historyCounter">
+                  <input id="historyCount" type="text" placeholder="Anzahl runs" value="10">
+                </div>
+              </h5>
+              <button class="btn btn-outline-primary" id="refreshHistoryBtn">
+                <i class="fas fa-sync-alt me-1"></i>Aktualisieren
+              </button>
+            </div>
+            
+            <div id="historyLoading" class="text-center py-5" style="display: none;">
+              <div class="loading-spinner me-2"></div>Lade Historie...
+            </div>
+            
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead class="table-dark">
+                  <tr>
+                    <th>Job ID</th>
+                    <th>Typ</th>
+                    <th>Datum</th>
+                    <th>Run</th>
+                    <th>Status</th>
+                    <th>Reports</th>
+                  </tr>
+                </thead>
+                <tbody id="historyTableBody">
+                  <tr><td colspan="6" class="text-center text-muted py-4">Klicke auf "Aktualisieren" um die Historie zu laden</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- User Management Tab -->
+          <div class="tab-pane fade p-4" id="users" role="tabpanel">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+              <button class="btn create-user-btn-container" id="createUserBtn">
+                <i class="fas fa-user-plus me-2"></i>Neuen Benutzer anlegen
+              </button>
+              <button class="btn btn-outline-primary" id="refreshUsersBtn">
+                <i class="fas fa-sync-alt me-1"></i>Aktualisieren
+              </button>
+            </div>
+            
+            <div id="usersLoading" class="text-center py-5" style="display: none;">
+              <div class="loading-spinner me-2"></div>Lade Benutzer...
+            </div>
+            
+            <div class="table-responsive">
+              <table class="table table-hover user-table">
+                <thead class="table-dark">
+                  <tr>
+                    <th style="width: 80px;">ID</th>
+                    <th>Benutzername</th>
+                    <th>E-Mail</th>
+                    <th>Rolle</th>
+                    <th style="width: 150px;" class="text-center">Aktionen</th>
+                  </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                  <tr><td colspan="5" class="text-center text-muted py-4">Klicke auf "Aktualisieren" um die Benutzer zu laden</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Log Tab -->
+          <div class="tab-pane fade" id="logs" role="tabpanel">
+            <div class="card">
+              <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">System Logs</h5>
+                <div>
+                  <button class="btn btn-sm btn-outline-secondary" id="refreshLogsBtn">
+                    <i class="fas fa-sync-alt me-1"></i>Aktualisieren
+                  </button>
+                  <select class="form-select form-select-sm d-inline-block w-auto ms-2" id="logFileSelect">
+                    <option value="analysis">Analysis Log</option>
+                    <option value="auth">Auth Log</option>
+                    <option value="ssh">SSH Wrapper Log</option>
+                  </select>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="log-viewer">
+                  <pre id="logContent" class="log-content"></pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {% endif %}       
+    </div>
+  </div>
+</div>
+
+<!-- Run Folder Modal -->
+<div class="modal fade" id="runFolderModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">
+          <i class="fas fa-folder-tree me-2"></i>Run-Ordner auswählen
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <div id="folderLoading" class="text-center py-4" style="display: none;">
+          <div class="loading-spinner me-2"></div>Lade Ordner...
+        </div>
+        <ul id="runFolderList" class="list-group list-group-flush"></ul>
+      </div>
+      <div class="modal-footer">
+        <div class="me-auto">
+          <small class="text-muted">
+            <i class="fas fa-location-dot me-1"></i>
+            <span id="runCurrentPath"></span>
+          </small>
+        </div>
+        <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">
+          <i class="fas fa-xmark me-1"></i>Abbrechen
+        </button>
+        <button type="button" class="btn btn-success" id="confirmRunFolderBtn">
+          <i class="fas fa-check me-1"></i>Auswählen
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Create User Modal -->
+<div class="modal fade" id="createUserModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-user-plus me-2"></i>Neuen Benutzer anlegen</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="createUserForm">
+          <div class="mb-3">
+            <label class="form-label">Benutzername</label>
+            <input type="text" class="form-control" name="username" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">E-Mail</label>
+            <input type="email" class="form-control" name="email" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Passwort</label>
+            <input type="password" class="form-control" name="password" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Rolle</label>
+            <select class="form-control" name="role" required>
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Abbrechen</button>
+        <button type="button" class="btn btn-success" id="saveNewUserBtn">
+          <i class="fas fa-save me-1"></i>Speichern
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Edit User Modal -->
+<div class="modal fade" id="editUserModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-user-edit me-2"></i>Benutzer bearbeiten</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="editUserForm">
+          <input type="hidden" name="id">
+          <div class="mb-3">
+            <label class="form-label">Benutzername</label>
+            <input type="text" class="form-control" name="username" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">E-Mail</label>
+            <input type="email" class="form-control" name="email" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Neues Passwort (optional)</label>
+            <input type="password" class="form-control" name="password">
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Rolle</label>
+            <select class="form-control" name="role" required>
+              <option value="user">User</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Abbrechen</button>
+        <button type="button" class="btn btn-success" id="saveEditUserBtn">Speichern</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Change Password Modal -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title"><i class="fas fa-key me-2"></i>Passwort ändern</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form id="changePasswordForm">
+          <div class="mb-3">
+            <label class="form-label">Aktuelles Passwort</label>
+            <input type="password" class="form-control" name="current_password" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Neues Passwort</label>
+            <input type="password" class="form-control" name="new_password" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Neues Passwort bestätigen</label>
+            <input type="password" class="form-control" name="confirm_password" required>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-cancel" data-bs-dismiss="modal">Abbrechen</button>
+        <button type="button" class="btn btn-success" id="savePasswordBtn">
+          <i class="fas fa-save me-1"></i>Passwort ändern
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden data for JavaScript -->
+<script id="app-config" type="application/json">
+{
+  "runningJobId": {% if running_job %}{{ running_job.id }}{% else %}null{% endif %}
+}
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
