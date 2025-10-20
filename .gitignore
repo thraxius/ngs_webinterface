@@ -2,6 +2,7 @@
 *.pem
 *.key
 *.pub
+*.ssh
 id_rsa
 id_rsa.pub
 id_ed25519
