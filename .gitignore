@@ -1,0 +1,32 @@
+# SSH keys (niemals hochladen!)
+*.pem
+*.key
+*.pub
+id_rsa
+id_rsa.pub
+id_ed25519
+id_ed25519.pub
+.ssh/
+
+# Python Cache & virtuelle Umgebungen
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+
+# Logs
+*.log
+
+# Datenbanken
+*.db
+
+# Configs & Secrets
+.env
+config/*.json
+instance/
+
+# IDE/Editor spezifisches
+.vscode/
+.idea/
+
