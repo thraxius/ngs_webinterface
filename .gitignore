@@ -31,3 +31,10 @@ instance/
 .vscode/
 .idea/
 
+# Backup Dateien
+*.bak
+.backup/
+
+# Gitignore selbst
+.gitignore
+
