@@ -8,7 +8,7 @@ REMOTE_USER="odin"
 MUBAC_HOST="10.20.30.216"
 SPECDIFF_HOST="10.20.30.217"
 REMOTE_HOST="$MUBAC_HOST"  # Default host; can be changed based on analysis
-KEY="/opt/ngs_webinterface/.sshKey"
+KEY="/opt/ngs_webinterface/.ssh/.sshKey"
 TIMEOUT=30
 LOG_DIR="/var/log/ngs_webinterface"
 MAX_RETRIES=3
@@ -105,8 +105,8 @@ case "$MODE" in
 
     get_log)
         if [ $# -ne 2 ]; then
-            echo "Error: get_log mode requires exactly 2 argument" >&2
-            log "Error: get_log mode requires exactly 2 argument, got $#"
+            echo "Error: get_log mode requires exactly 2 arguments" >&2
+            log "Error: get_log mode requires exactly 2 arguments, got $#"
             exit 1
         fi
         
@@ -143,9 +143,9 @@ case "$MODE" in
         ;;
 
     kill)
-        if [ $# -ne 1 ]; then
-            echo "Error: kill mode requires exactly 1 argument" >&2
-            log "Error: kill mode requires exactly 1 argument, got $#"
+        if [ $# -ne 2 ]; then
+            echo "Error: kill mode requires exactly 2 arguments" >&2
+            log "Error: kill mode requires exactly 2 arguments, got $#"
             exit 1
         fi
         

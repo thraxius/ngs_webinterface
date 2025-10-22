@@ -5,7 +5,6 @@ Separated from routes for better testability and maintainability
 """
 
 import os
-import json
 import re
 import logging
 from datetime import datetime, timedelta, timezone
@@ -155,11 +154,11 @@ class AnalysisService:
                 job_type=analysis_type,
                 job_code=job_code,
                 run_name=run_name,
-                parameters=json.dumps({
+                parameters={
                     "samples": selected_samples,
                     "input_path": validated_path,
                     "sample_count": len(selected_samples)
-                }),
+                },
                 status="queued",
                 progress=0,
                 created_at=now
@@ -293,7 +292,7 @@ class AnalysisService:
                 logger.warning(f"Unauthorized access attempt to job {job_id} by user {user_id}")
                 return {"error": "Unauthorized"}
             
-            params = json.loads(job.parameters) if job.parameters else {}
+            params = job.parameters if job.parameters else {}
             input_path = params.get("input_path")
             
             if not input_path:
@@ -343,7 +342,7 @@ class AnalysisService:
                 logger.warning(f"Unauthorized log access attempt for job {job_id}")
                 return {"log": "[ERROR] Keine Berechtigung"}
             
-            params = json.loads(job.parameters) if job.parameters else {}
+            params = job.parameters if job.parameters else {}
             input_path = params.get("input_path")
             
             if not input_path:

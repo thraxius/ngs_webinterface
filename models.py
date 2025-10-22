@@ -59,7 +59,7 @@ class AnalysisJob(db.Model):
     job_type = db.Column(db.String(50), nullable=False, index=True)  # 'wgs', 'species', etc.
     job_code = db.Column(db.String(50), unique=True, nullable=False, index=True)
     run_name = db.Column(db.String(255))
-    parameters = db.Column(db.Text)  # JSON string with job parameters
+    parameters = db.Column(db.JSON)  # JSON string with job parameters
     status = db.Column(db.String(20), default='queued', index=True)  # queued, running, finished, failed
     progress = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=lambda: datetime.now(timezone.utc), index=True)
