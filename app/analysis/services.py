@@ -303,7 +303,7 @@ class AnalysisService:
                 log_content = ssh_get_log(input_path, job.job_type)
                 
                 if log_content:
-                    if re.search(r"Analysis is ready|ANALYSIS COMPLETE", log_content, re.IGNORECASE):
+                    if re.search(r"Bioinformatic analysis is ready", log_content, re.IGNORECASE):
                         job.status = "finished"
                         job.updated_at = datetime.now(timezone.utc)
                         db.session.commit()
@@ -355,6 +355,39 @@ class AnalysisService:
         except Exception as e:
             logger.error(f"Error in get_job_log for job {job_id}: {e}")
             return {"log": f"[ERROR] Fehler beim Laden des Logs: {str(e)}"}
+        
+    @staticmethod
+    def mark_job_finished(job_code):
+        """
+        Mark job as finished by job_code
+        
+        Args:
+            job_code: Job code identifier
+            
+        Returns:
+            Tuple of (success, error_message)
+        """
+        try:
+            job = AnalysisJob.query.filter_by(job_code=job_code).first()
+            
+            if not job:
+                logger.warning(f"Job not found: {job_code}")
+                return False, "Job not found"
+            
+            if job.status == "running":
+                job.status = "finished"
+                job.updated_at = datetime.now(timezone.utc)
+                db.session.commit()
+                logger.info(f"Marked job {job_code} as finished via callback")
+                return True, None
+            else:
+                logger.info(f"Job {job_code} already in status: {job.status}")
+                return True, None
+                
+        except Exception as e:
+            logger.error(f"Error marking job {job_code} as finished: {e}")
+            db.session.rollback()
+            return False, str(e)
     
     @staticmethod
     @lru_cache(maxsize=128)
@@ -419,4 +452,4 @@ class AnalysisService:
             
         except Exception as e:
             logger.error(f"Error in browse_folder: {e}")
-            return [], "", str(e)
+            return [], "", str(e)          

@@ -885,21 +885,21 @@ class NGSInterface {
 
     return `
       <tr>
-        <td><strong>#${user.id}</strong></td>
-        <td>
-          <div class="d-flex align-items-center">
-            <i class="fas fa-user-circle text-muted me-2"></i>
-            <span class="fw-medium">${Utils.escapeHtml(user.username)}</span>
-            ${user.is_current_user ? '<span class="badge table-badge ms-2">Sie</span>' : ''}
-          </div>
-        </td>
-        <td>
-          ${user.email ? 
-            `<i class="fas fa-envelope text-muted me-2"></i>${Utils.escapeHtml(user.email)}` :
-            '<span class="text-muted"><i class="fas fa-minus me-2"></i>Nicht angegeben</span>'}
-        </td>
-        <td>${roleBadge}</td>
-        <td class="text-center">${actionsHtml}</td>
+      <td><strong>#${user.id}</strong></td>
+      <td>
+        <div class="d-flex align-items-center">
+        <i class="fas fa-user-circle text-muted me-2"></i>
+        <span class="fw-medium">${Utils.escapeHtml(user.username)}</span>
+        ${user.is_current_user ? '<span class="fas fa-arrow-right-to-bracket text-muted ms-2"></span>' : ''}
+        </div>
+      </td>
+      <td>
+        ${user.email ? 
+        `<i class="fas fa-envelope text-muted me-2"></i>${Utils.escapeHtml(user.email)}` :
+        '<span class="text-muted"><i class="fas fa-minus me-2"></i>Nicht angegeben</span>'}
+      </td>
+      <td>${roleBadge}</td>
+      <td class="text-center">${actionsHtml}</td>
       </tr>
     `;
   }

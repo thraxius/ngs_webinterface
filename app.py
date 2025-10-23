@@ -16,6 +16,8 @@ from dotenv import load_dotenv
 from config import Config
 from extensions import db, login_manager
 
+logger = logging.getLogger('app')
+
 # Load environment variables
 load_dotenv()
 
@@ -49,8 +51,7 @@ def create_app(config_class=Config):
     register_error_handlers(app)
     
     # Log application startup
-    app.logger.info('NGS Webinterface application started')
-    
+    logger.info("Flask application created and configured")
     return app
 
 
@@ -62,9 +63,9 @@ def setup_logging(app):
     if not os.path.exists(log_dir):
         try:
             os.makedirs(log_dir)
-            app.logger.info(f"Created log directory: {log_dir}")
+            logger.info(f"Created log directory: {log_dir}")
         except Exception as e:
-            app.logger.error(f"Failed to create log directory: {e}")
+            logger.error(f"Failed to create log directory: {e}")
             # Fallback to local logs directory
             log_dir = os.path.join(os.path.dirname(__file__), 'logs')
             os.makedirs(log_dir, exist_ok=True)
@@ -77,6 +78,10 @@ def setup_logging(app):
 
     # Different log files configuration
     loggers_config = {
+        'app': {
+            'file': 'app.log',
+            'level': logging.INFO
+        },
         'analysis': {
             'file': 'analysis.log',
             'level': logging.INFO
@@ -91,6 +96,18 @@ def setup_logging(app):
         },
         'core': {
             'file': 'core.log',
+            'level': logging.INFO,
+        },
+        'history': {
+            'file': 'history.log',
+            'level': logging.INFO
+        },
+        'users': {
+            'file': 'users.log',
+            'level': logging.INFO
+        },
+        'logs': {
+            'file': 'logs.log',
             'level': logging.INFO
         }
     }
@@ -112,9 +129,9 @@ def setup_logging(app):
             handler.setFormatter(formatter)
             logger.addHandler(handler)
             
-            app.logger.info(f"Setup logger: {logger_name} -> {config['file']}")
+            logger.info(f"Logger {logger_name} initialized")
         except Exception as e:
-            app.logger.error(f"Failed to setup logger {logger_name}: {e}")
+            logger.error(f"Failed to setup logger {logger_name}: {e}")
     
     # Setup Flask app logger
     if not app.debug:
@@ -155,7 +172,8 @@ def register_template_filters(app):
             
             return corrected_dt.strftime('%d.%m.%Y %H:%M')
         except Exception as e:
-            app.logger.error(f"Error localizing datetime: {e}")
+
+            logger.error(f"Error localizing datetime: {e}")
             return dt.strftime('%d.%m.%Y %H:%M') if dt else ""
     
     @app.template_filter('format_date')
@@ -166,7 +184,8 @@ def register_template_filters(app):
         try:
             return dt.strftime(format)
         except Exception as e:
-            app.logger.error(f"Error formatting date: {e}")
+
+            logger.error(f"Error formatting date: {e}")
             return str(dt)
     
     @app.template_filter('format_time')
@@ -177,7 +196,8 @@ def register_template_filters(app):
         try:
             return dt.strftime(format)
         except Exception as e:
-            app.logger.error(f"Error formatting time: {e}")
+
+            logger.error(f"Error formatting time: {e}")
             return str(dt)
 
 
@@ -195,7 +215,7 @@ def register_blueprints(app):
     app.register_blueprint(users_bp)
     app.register_blueprint(logs_bp)
     
-    app.logger.info('Blueprints registered: auth, analysis, history, users, logs')
+    logger.info('Blueprints registered: auth, analysis, history, users, logs')
 
 
 def register_error_handlers(app):
@@ -203,18 +223,21 @@ def register_error_handlers(app):
     
     @app.errorhandler(404)
     def not_found_error(error):
-        app.logger.warning(f"404 error: {error}")
+
+        logger.warning(f"404 error: {error}")
         return "Seite nicht gefunden", 404
     
     @app.errorhandler(500)
     def internal_error(error):
-        app.logger.error(f"500 error: {error}", exc_info=True)
+
+        logger.error(f"500 error: {error}", exc_info=True)
         db.session.rollback()
         return "Interner Serverfehler", 500
     
     @app.errorhandler(Exception)
     def handle_unexpected_error(error):
-        app.logger.error(f"Unexpected error: {error}", exc_info=True)
+        
+        logger.error(f"Unexpected error: {error}", exc_info=True)
         db.session.rollback()
         return "Ein unerwarteter Fehler ist aufgetreten", 500
 

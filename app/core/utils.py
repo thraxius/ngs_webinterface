@@ -42,28 +42,36 @@ def validate_path(path, analysis_type=None):
         Forbidden: If path is outside allowed base path
     """
     if not path:
+        logger.warning("Empty path provided for validation")
         raise BadRequest("Pfad ist leer")
     
     # Determine appropriate base path
     if analysis_type and analysis_type in ANALYSIS_BASE_PATHS:
         base_path = ANALYSIS_BASE_PATHS[analysis_type]
+
+        logger.info(f"Validating path for analysis type '{analysis_type}': {path}")
     else:
         # Default fallback or try to determine from path
         base_path = None
         for atype, apath in ANALYSIS_BASE_PATHS.items():
             if path.startswith(apath):
                 base_path = apath
+
+                logger.info(f"Validating path for detected analysis type '{atype}': {path}")
                 break
         
         if not base_path:
             # Default to first available base path
             base_path = list(ANALYSIS_BASE_PATHS.values())[0]
+
+            logger.info(f"Validating path with default base path: {path}")
     
     # Resolve path and check if it's within base_path
     resolved_path = os.path.abspath(path)
     base_resolved = os.path.abspath(base_path)
     
     if not resolved_path.startswith(base_resolved):
+        logger.warning(f"Path validation failed. Path: {resolved_path}, Base: {base_resolved}")
         raise Forbidden("Zugriff außerhalb des erlaubten Bereichs")
     
     return resolved_path
@@ -81,6 +89,7 @@ def generate_job_code(job_type, job_count_today):
         Job code string (e.g., 'wgs241009_01')
     """
     now = datetime.now()
+    logger.info(f"Generating job code for type: {job_type}, count today: {job_count_today}")
     return f"{job_type}{now.strftime('%y%m%d')}_{job_count_today:02d}"
 
 
@@ -99,10 +108,13 @@ def cleanup_old_cache(cache_dict, max_age_seconds=300):
         age = (current_time - timestamp).total_seconds()
         if age > max_age_seconds:
             keys_to_delete.append(key)
+
+            logger.info(f"Cache entry '{key}' is {age} seconds old and will be removed")
     
     for key in keys_to_delete:
         del cache_dict[key]
-        logger.debug(f"Removed expired cache entry: {key}")
+        
+        logger.info(f"Removed expired cache entry: {key}")
 
 
 def format_file_size(size_bytes):

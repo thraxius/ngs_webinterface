@@ -1,6 +1,6 @@
 # history/routes.py
 """
-Routes for analysis history
+Routes for history
 """
 
 import os
@@ -13,7 +13,7 @@ from extensions import db
 from models import AnalysisJob
 from app.core.utils import SUPPORTED_REPORT_EXTENSIONS
 
-logger = logging.getLogger('analysis')
+logger = logging.getLogger('history')
 
 history_bp = Blueprint('history', __name__)
 
@@ -31,9 +31,8 @@ def api_analysis_history():
         jobs_data = []
         
         for job in jobs:
-            # Parse parameters safely
             try:
-                params = json.loads(job.parameters) if job.parameters else {}
+                params = job.parameters if job.parameters else {}
                 input_path = params.get("input_path", "")
             except (json.JSONDecodeError, TypeError) as e:
                 input_path = ""

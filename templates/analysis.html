@@ -61,7 +61,7 @@
           <strong><i class="fas fa-cogs me-2"></i>Analyse läuft:</strong>
           <code style="background: var(--glass-selected);">{{ running_job.job_code }}</code>
           <small class="text-muted">
-            ({{ running_job.local_created | localize }} - {{ running_job.job_type }})
+            ({{ running_job.created_at.strftime('%d.%m.%Y %H:%M') }} - {{ running_job.job_type }})
           </small>
         </div>
         <form method="POST" action="{{ url_for('analysis.cancel_analysis', job_id=running_job.id) }}">
@@ -74,7 +74,6 @@
       <!-- Progress Bar -->
       <div class="progress mb-4" style="height: 15px;">
         <div id="progressBar" class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: 100%;">
-          <span class="visually-hidden">Analyse läuft...</span>
         </div>
       </div>
 
@@ -282,6 +281,11 @@
                     <option value="analysis">Analysis Log</option>
                     <option value="auth">Auth Log</option>
                     <option value="ssh">SSH Wrapper Log</option>
+                    <option value="core">Core Log</option>
+                    <option value="app">App Log</option>
+                    <option value="users">User Management Log</option>
+                    <option value="history">History Log</option>
+                    <option value="logs">General Log</option>
                   </select>
                 </div>
               </div>

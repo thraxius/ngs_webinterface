@@ -8,7 +8,7 @@ import logging
 from flask import Blueprint, jsonify
 from flask_login import login_required, current_user
 
-logger = logging.getLogger('analysis')
+logger = logging.getLogger('logs')
 
 logs_bp = Blueprint('logs', __name__)
 
@@ -33,16 +33,22 @@ def api_logs(log_type):
         'analysis': 'analysis.log',
         'auth': 'auth.log',
         'ssh': 'ssh_wrapper.log',
-        'app': 'app.log'
+        'app': 'app.log',
+        'core': 'core.log',
+        'history': 'history.log',
+        'users': 'users.log',
+        'logs': 'logs.log'
     }
 
     if log_type not in log_files:
+        logger.warning(f"Invalid log type requested: {log_type}")
         return jsonify({'error': 'Ungültiger Log-Typ'}), 400
 
     try:
         log_path = os.path.join('/var/log/ngs_webinterface', log_files[log_type])
         
         if not os.path.exists(log_path):
+            logger.warning(f"Log file not found: {log_path}")
             return jsonify({'content': f'Log-Datei {log_type} nicht gefunden'})
 
         # Read last 1000 lines

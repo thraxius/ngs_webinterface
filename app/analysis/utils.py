@@ -52,7 +52,7 @@ def ssh_command(mode, *args, capture_output=False, background=False, timeout=SSH
                 timeout=timeout,
                 check=False
             )
-            logger.info(f"Executed SSH command: {' '.join(cmd)} with return code {result.returncode}")
+            logger.info(f"Executed SSH command: {' '.join(cmd)}")
             if result.returncode == 0:
                 return result.stdout.strip() if capture_output else True, None
             else:
@@ -81,32 +81,30 @@ def ssh_start_analysis(*args):
     return ssh_command("run", *args, background=True)
 
 
-def ssh_kill_job(job_id, job_type):
+def ssh_kill_job(*args):
     """
     Kill running job
     
     Args:
-        job_id: Job identifier
-        job_type: Type of analysis
+        *args: Arguments for killing job (job_code, job_type)
         
     Returns:
         Tuple of (success, error_message)
     """
-    return ssh_command("kill", str(job_id), job_type, timeout=SSH_KILL_TIMEOUT)
+    return ssh_command("kill", *args, timeout=SSH_KILL_TIMEOUT)
 
 
-def ssh_get_log(input_path, analysis_type):
+def ssh_get_log(*args):
     """
     Fetch log with size limit
     
     Args:
-        input_path: Path to analysis input
-        analysis_type: Type of analysis
-        
+        *args: Arguments for fetching log (input_path, analysis_type)
+
     Returns:
         Log content string
     """
-    result, error = ssh_command("get_log", input_path, analysis_type, capture_output=True, timeout=SSH_LOG_TIMEOUT)
+    result, error = ssh_command("get_log", *args, capture_output=True, timeout=SSH_LOG_TIMEOUT)
     
     if error:
         logger.error(f"Log fetch error: {error}")

@@ -193,6 +193,16 @@ def show_report():
         logger.error(f"Error serving report {filepath}: {e}")
         return "Interner Serverfehler", 500
 
+@analysis_bp.route('/job_done/<job_code>', methods=['POST'])
+def job_done(job_code):
+    """Callback endpoint for completed jobs"""
+    success, error = AnalysisService.mark_job_finished(job_code)
+    
+    if not success:
+        status_code = 404 if error == "Job not found" else 500
+        return jsonify({"error": error}), status_code
+    
+    return jsonify({"status": "success", "job_code": job_code}), 200
 
 # Error handlers
 @analysis_bp.errorhandler(BadRequest)

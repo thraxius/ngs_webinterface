@@ -11,7 +11,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from extensions import db
 from models import User, AnalysisJob
 
-logger = logging.getLogger('auth')
+logger = logging.getLogger('users')
 
 users_bp = Blueprint('users', __name__)
 
